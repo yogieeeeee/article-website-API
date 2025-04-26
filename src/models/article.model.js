@@ -26,10 +26,6 @@ const articleSchema = new Schema(
       enum: ["Technology", "Business", "Travel", "Food", "Other"],
       default: []
     },
-    tags: {
-      type: [String],
-      default: []
-    },
     likes: [
       {
         type: Schema.Types.ObjectId,

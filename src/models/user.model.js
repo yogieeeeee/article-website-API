@@ -26,6 +26,7 @@ const userSchema = new Schema({
   },
   avatar: {
     type: String,
+    default: null
   },
   status: {
     type: Boolean,

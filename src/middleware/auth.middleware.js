@@ -1,53 +1,45 @@
-import jwt from "jsonwebtoken";
-import User from "../models/users.model.js"; // Adjust the path according to your project structure
+import jwt from "jsonwebtoken"
+import User from "../models/user.model.js"
 
 const authMiddleware = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = req.headers.authorization
 
-    // Check if the Authorization header is available and starts with "Bearer "
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader?.startsWith("Bearer ")) {
       return res.status(401).json({
         success: false,
-        message: "Token is unavailable or invalid"
-      });
+        message: "Token is invalid or unavailable"
+      })
     }
 
-    // Extract the token from the header
-    const token = authHeader.split(" ")[1];
+    const token = authHeader.split(" ")[1]
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
-    // Verify the token using the secret key from the environment variables
-    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    // Search user in database
+    const user = await User.findById(decoded.id)
 
-    // Find the user in the database based on the ID from the token payload
-    const user = await User.findById(decoded.id).select("-password -refreshToken");
-
-    // If the user is not found in the database
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: "User not found"
-      });
+        message: "User cannot found"
+      })
     }
 
-    // Attach user information to the request object for further use
+    // Attach user to request object
     req.user = {
       id: user._id.toString(),
       name: user.name,
       email: user.email,
       role: user.role,
-      status: user.isActive
-    };
-
-    // Proceed to the next middleware or route handler
-    next();
+    }
+    next()
   } catch (error) {
-    console.error("Authorization error:", error);
-    return res.status(401).json({
+    console.error("Error otorisasi:", error)
+    res.status(401).json({
       success: false,
-      message: "Session expired or token is invalid"
-    });
+      message: "Session has expired or token is invalid"
+    })
   }
-};
+}
 
-export default authMiddleware;
+export default authMiddleware

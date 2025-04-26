@@ -1,5 +1,11 @@
 /////////////// CREATE NEW ARTICLE ////////////////
-export const createArticle = (req, res) => {}
+export const createArticle = async (req, res) => {
+  try {
+    const {title, content, author, image, categories} = req.body
+    
+    
+  } catch (error) {}
+}
 
 /////////////// GET ALL ARTICLES ////////////////
 export const getAllArticles = (req, res) => {}

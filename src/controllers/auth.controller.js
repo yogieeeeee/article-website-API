@@ -16,20 +16,20 @@ export const register = async (req, res) => {
 
   // check email is registered
   const existingUser = await User.findOne({email})
-  if (existingUser) {
-    return res.status(400).json({message: "The email is already registered"}) // return error
-  }
-
-  // Validate email format
-  if (!validator.isEmail(email)) {
-    return res.status(400).json({message: "The email isn't valid"}) // return error
-  }
-
-  // Hash password
-  const salt = await bcryptjs.genSalt(10)
-  const hashedPassword = await bcryptjs.hash(password, salt)
-
   try {
+    if (existingUser) {
+      return res.status(400).json({message: "The email is already registered"}) // return error
+    }
+
+    // Validate email format
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({message: "The email isn't valid"}) // return error
+    }
+
+    // Hash password
+    const salt = await bcryptjs.genSalt(10)
+    const hashedPassword = await bcryptjs.hash(password, salt)
+
     // Save new user
     const newUser = new User({
       name,
@@ -42,7 +42,10 @@ export const register = async (req, res) => {
     res.status(201).json({message: "Account created successfully"})
   } catch (error) {
     // Tangani error
-    res.status(500).json({message: "Something went wrong with the server"}) // Return error
+    res.status(500).json({
+      success: false,
+      message: `server error occurred: ${error.message}`
+    }) // Return error
   }
 }
 
@@ -74,7 +77,7 @@ export const login = async (req, res) => {
         id: user._id.toString(),
         role: user.role,
         email: user.email,
-        isActive: user.isActive
+        status: user.status
       },
       process.env.JWT_SECRET, // Using environment variable
       {expiresIn: "1h"}
@@ -101,11 +104,14 @@ export const login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        isActive: user.isActive
+        status: user.status
       }
     })
   } catch (error) {
     console.error("Login Error:", error)
-    res.status(500).json({message: `server error occurred: ${error.message}`}) // Return error
+    res.status(500).json({
+      success: false,
+      message: `server error occurred: ${error.message}`
+    }) // Return error
   }
 }
